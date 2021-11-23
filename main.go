@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-ini/ini"
+	"io/ioutil"
 	"log"
 	"net"
+	"net/http"
 	"os"
 )
 
@@ -27,11 +29,30 @@ func main() {
 			"message": ipStr,
 		})
 	})
+	r.GET("/p6", func(c *gin.Context) {
+		bytes,_:=httpClientGet(`http://192.168.100.66:30080/p3`)
+		c.JSON(200, gin.H{
+			"message": string(bytes),
+		})
+	})
 	addr := fmt.Sprintf(`:%s`, port)
 	err:=r.Run(addr)
 	if err!=nil{
 		log.Fatal(`run_err:`,err.Error())
 	}
+}
+
+func httpClientGet(url string) ([]byte, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
 }
 
 func getLocalIP() (ipv4 string, err error) {
