@@ -2,13 +2,18 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/go-ini/ini"
 	"log"
 	"net"
+	"os"
 )
 
 func main() {
+	Cfg := loadStartConfig(config)
+	port := Cfg.Section(`common`).Key(`server_port`).String()
 	r := gin.Default()
 	r.GET("/p3", func(c *gin.Context) {
 		ipStr,err:=getLocalIP()
@@ -22,7 +27,7 @@ func main() {
 			"message": ipStr,
 		})
 	})
-	addr := fmt.Sprintf(`:%d`, 8180)
+	addr := fmt.Sprintf(`:%s`, port)
 	err:=r.Run(addr)
 	if err!=nil{
 		log.Fatal(`run_err:`,err.Error())
@@ -53,4 +58,33 @@ func getLocalIP() (ipv4 string, err error) {
 	}
 	err = errors.New(`not found`)
 	return
+}
+
+//初始化配置
+func loadStartConfig(env string) *ini.File {
+	var err error
+	pwd, _ := os.Getwd()
+	cfg, err := ini.Load(fmt.Sprintf(`%s/config/%s.ini`, pwd, env))
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return cfg
+}
+
+var (
+	config      string
+	serviceName string
+	help        bool
+)
+
+func init() {
+	log.SetFlags(log.LstdFlags | log.Llongfile)
+	flag.StringVar(&config, "c", "local", "配置文件名")
+	flag.StringVar(&serviceName, "s", "api", "服务功能")
+	flag.BoolVar(&help, "h", false, "使用说明")
+	flag.Parse()
+	if help {
+		flag.PrintDefaults()
+		os.Exit(2)
+	}
 }
