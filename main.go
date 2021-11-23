@@ -32,8 +32,9 @@ func main() {
 			"message": ipStr,
 		})
 	})
-	r.GET("/p6", func(c *gin.Context) {
-		bytes,_:=httpClientGet(`http://192.168.100.66:30080/p3`)
+	r.GET("/p6/:url", func(c *gin.Context) {
+		url:=c.Param(`url`)
+		bytes,_:=httpClientGet(url)
 		c.JSON(200, gin.H{
 			"message": string(bytes),
 		})
