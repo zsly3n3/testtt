@@ -15,7 +15,10 @@ import (
 
 func main() {
 	Cfg := loadStartConfig(config)
-	port := Cfg.Section(`common`).Key(`server_port`).String()
+	sec:=Cfg.Section(`common`)
+	port := sec.Key(`server_port`).String()
+	mode := sec.Key(`env_model`).String()
+	gin.SetMode(mode)
 	r := gin.Default()
 	r.GET("/p3", func(c *gin.Context) {
 		ipStr,err:=getLocalIP()
