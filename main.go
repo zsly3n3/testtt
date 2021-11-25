@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"time"
 )
 
 func main() {
@@ -37,6 +38,12 @@ func main() {
 		bytes,_:=httpClientGet(url)
 		c.JSON(200, gin.H{
 			"message": string(bytes),
+		})
+	})
+	r.POST("/p0", func(c *gin.Context) {
+		now:=time.Now().Unix()
+		c.JSON(200, gin.H{
+			"message": fmt.Sprintf(`%d`,now),
 		})
 	})
 	addr := fmt.Sprintf(`:%s`, port)
